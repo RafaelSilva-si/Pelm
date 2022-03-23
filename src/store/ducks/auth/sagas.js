@@ -16,7 +16,7 @@ export function* login(payload) {
 	try {
 		const response = yield call(auth.login, {
 			...payload.user,
-			app: process.env.REACT_APP_APP_AUTH,
+			app: 'portal-pelm',
 		});
 
 		if (response.data.user) {

@@ -18,7 +18,7 @@ Painel Administrativo 🌐
 
 ⚠️ Servidor pode estar lento, recarregue a página e divirta-se.
 
-🔗
+🔗 https://pelm-frontend.herokuapp.com/
 
 👤 user: pelm_admin </br>
 🔑 password: sucesso2022

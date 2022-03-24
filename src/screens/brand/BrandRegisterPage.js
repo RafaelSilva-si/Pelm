@@ -14,8 +14,6 @@ class BrandRegisterPage extends React.Component {
 		this.state = {
 			id: false,
 		};
-
-		/*this.onSubmit = this.onSubmit.bind(this);*/
 	}
 
 	async componentDidMount() {

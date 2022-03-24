@@ -28,6 +28,8 @@ class UserList extends React.Component {
 
 		return (
 			<div>
+				Filtro Desativado
+				{/*
 				<Filter
 					onSubmit={values => {
 						onSubmitFilter(values);
@@ -35,7 +37,7 @@ class UserList extends React.Component {
 							resetPaginationToggle: !resetPaginationToggle,
 						});
 					}}
-				/>
+				/>*/}
 				<DataTable
 					loading={loadingFilter}
 					columns={columns}

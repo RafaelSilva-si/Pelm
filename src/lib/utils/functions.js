@@ -100,21 +100,9 @@ export const generateHash = () => {
 };
 
 export const numberToPrice = v => {
-	if (v === 0) {
-		return '0,00';
-	}
-	let value = v;
-	value = parseFloat(value);
-	value = value.toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
-	value = value
-		.split('.')
-		.join('*')
-		.split(',')
-		.join('.')
-		.split('*')
-		.join(',');
-	console.log(typeof value)
-	return value;
+	
+	return v.replace(/\D/g,"")
+			.replace(/(\d)(\d{2})$/,"$1,$2");
 };
 
 export const priceToNumber = v => {

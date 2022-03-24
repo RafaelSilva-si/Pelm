@@ -1,11 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Form from '../../components/User/UserRegisterForm';
-import { navigateBack } from '../../lib/utils/navigation';
 import {
-	productsActions
+	productsActions,
+	brandsActions,
+	fornActions
 } from '../../store/actions';
-import R from '../../lib/constants/R';
 import { LoadingContent, Page } from '../../components/Utils/Page';
 import FormProd from '../../components/Products/ProductsRegisterForm';
 
@@ -16,23 +15,45 @@ class ProductsRegisterPage extends React.Component {
 		this.state = {
 			id: false,
 		};
-
-		/*this.onSubmit = this.onSubmit.bind(this);*/
 	}
 
 	async componentDidMount() {
+		const { match, onGetBrand, onGetForn, onGetListProducts } = this.props;
+
+		const { id } = match.params;
+
+		this.setState({
+			id,
+		});
+
+		if (id) {
+			await onGetListProducts({id: id});
+		}
 		
+		await onGetForn({status: true})
+		await onGetBrand({ status: true })
 	}
 
 	onSubmit = data => {
-		
+		const { id } = this.state;
+		const { onEdit, addProduct} = this.props;
+
+		if (id) {
+			onEdit(data, id);
+		} else {
+			addProduct(data)
+		}
 	};
 
 	render() {
 		const { id } = this.state;
 
 		const {
-			addProduct
+			addProduct,
+			brands,
+			prod,
+			forn,
+			loading
 		} = this.props;
 
 		return (
@@ -47,9 +68,12 @@ class ProductsRegisterPage extends React.Component {
 						active: true,
 					},
 				]}>
-				<LoadingContent loading={false}>
-					<FormProd 
-						onSubmit={data => addProduct(data)}
+				<LoadingContent loading={id? !prod : loading}>
+					<FormProd
+						prod={prod[0]}
+						forn={forn}
+						brands={brands}
+						onSubmit={data => this.onSubmit(data)}
 					/>
 				</LoadingContent>
 			</Page>
@@ -57,40 +81,21 @@ class ProductsRegisterPage extends React.Component {
 	}
 }
 
-const mapStateToProps = state => {
-	
-};
-
-const mapDispatchToProps = dispatch => ({
-	addProduct: product => dispatch(productsActions.addProducts(product))
+const mapStateToProps = state => ({
+	loading: state.api.loading,
+	brands: state.brand.list,
+	forn: state.forn.list,
+	prod: state.products.listProd,
 });
 
-/*
-UserRegisterPage.propTypes = {
-	onAddNotification: PropTypes.func.isRequired,
-	onAddUser: PropTypes.func.isRequired,
-	onEditUser: PropTypes.func.isRequired,
-	onGetGroups: PropTypes.func.isRequired,
-	onGetRepresentatives: PropTypes.func.isRequired,
-	onGetUser: PropTypes.func.isRequired,
-	companies: PropTypes.oneOfType([
-		PropTypes.bool,
-		PropTypes.arrayOf(PropTypes.object),
-	]).isRequired,
-	groups: PropTypes.oneOfType([
-		PropTypes.bool,
-		PropTypes.arrayOf(PropTypes.object),
-	]).isRequired,
-	representatives: PropTypes.oneOfType([
-		PropTypes.bool,
-		PropTypes.arrayOf(PropTypes.object),
-	]).isRequired,
-	loading: PropTypes.bool.isRequired,
-	match: PropTypes.shape({
-		params: PropTypes.shape({ id: PropTypes.string }),
-	}).isRequired,
-	user: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]).isRequired,
-};
-*/
+const mapDispatchToProps = dispatch => ({
+	onGetListProducts: query => dispatch(productsActions.getProductList(query)),
+	addProduct: product => dispatch(productsActions.addProducts(product)),
+	onGetBrand: query => dispatch(brandsActions.onGetList(query)),
+	onGetForn: query => dispatch(fornActions.getForn(query)),
+	onEdit: (data, id) => dispatch(productsActions.onEdit(data, id))
+});
+
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductsRegisterPage);

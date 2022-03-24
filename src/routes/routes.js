@@ -26,6 +26,7 @@ const FornRegisterPage = React.lazy(() => import('screens/forn/FornRegister'));
 const BrandsPage = React.lazy(() => import('screens/brand/BrandPages'));
 const BrandsRegisterPage = React.lazy(() => import('screens/brand/BrandRegisterPage'));
 
+
 const User = Authorize(false, ['USER']);
 
 const routes = [
@@ -94,6 +95,13 @@ const routes = [
 	{
 		path: '/products/add',
 		name: 'ProductsAdd',
+		component: User(ProdRegisterPage),
+		permission: true,
+		id: 144,
+	},
+	{
+		path: '/products/editar/:id',
+		name: 'ProductsEdit',
 		component: User(ProdRegisterPage),
 		permission: true,
 		id: 144,

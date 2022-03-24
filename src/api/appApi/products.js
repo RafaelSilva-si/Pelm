@@ -11,3 +11,6 @@ export const putProducts = (id, query) =>
 
 export const deleteProducts = (id, query) =>
     api.delete(`/products/${id}`, {params: query});
+
+export const updateStatus = (id, query) =>
+    api.put(`/products/status/${id}`, query)

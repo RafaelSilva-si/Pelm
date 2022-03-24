@@ -15,7 +15,7 @@ export function* getProductList(payload){
 	}
 
 	try {
-		const response = yield call(productsApi.getProducts);
+		const response = yield call(productsApi.getProducts, payload.query);
 		yield put(actions.setProductList(response.data.data));
 	} catch (error) {
 		yield put(
@@ -34,7 +34,6 @@ export function* addProduct(payload){
 	yield put(apiActions.apiSubmitStart());
 
 	const data = payload.product;
-	console.log(data)
 	try {
 		const response = yield call(productsApi.newProducts, data);
 		if (response.status) {
@@ -60,7 +59,92 @@ export function* addProduct(payload){
 	yield put(apiActions.apiSubmitEnd());
 }
 
+export function* updateProducts(payload){
+	yield put(apiActions.apiSubmitStart());
+
+	const {id, product} = payload;
+	
+	try {
+		const response = yield call(productsApi.putProducts, id, product);
+		if(response.status){
+            yield put(
+                notificationActions.addNotification(
+                    'Produto editado com sucesso',
+                    'success'
+                )
+            );
+            setTimeout(() => {
+                navigate('/products')
+            }, 1200);
+		}
+	} catch (error) {
+		yield put(
+            notificationActions.addNotification(
+                'Erro ao editar produto.',
+                'error'
+            )
+        );
+	}
+
+	yield put(apiActions.apiSubmitEnd());
+};
+
+export function* activeOrDesactiveProduct(payload){
+	const { product } = payload;
+
+	try {
+		const data = {
+			active: !product.status
+		};
+		const response = yield call(productsApi.updateStatus, product.id, data);
+		if(response.status){
+
+            yield put(actions.setRefresh(true));
+			yield put(actions.getProductList());
+        }
+	} catch (error) {
+		yield put(
+			notificationActions.addNotification(
+				'Erro ao mudar status do produto.',
+				'error',
+			),
+		);
+	};
+};
+
+export function* deleteProduct(payload){
+	yield put(apiActions.apiStart());
+
+    const { product } = payload;
+
+	try {
+		const response = yield call(productsApi.deleteProducts, product);
+		if (response.status) {
+			yield put(
+				notificationActions.addNotification(
+					'Produto deletado com sucesso!',
+					'success',
+				),
+			);
+			yield put(apiActions.toogleModal());
+			yield put(actions.getProductList());
+		}
+	} catch (error) {
+		yield put(
+			notificationActions.addNotification(
+				'Erro ao deletar produto.',
+				'error',
+			),
+		);
+	}
+	yield put(apiActions.apiEnd());
+}
+
 export default function* watchProducts(){
     yield takeLatest(types.GET_PRODUCTS, getProductList);
 	yield takeLatest(types.ADD_PRODUCTS, addProduct);
+	yield takeLatest(types.EDIT_PRODUCT, updateProducts);
+	yield takeLatest(types.UPDATE_STATUS, activeOrDesactiveProduct);
+	yield takeLatest(types.DELETE_PRODUCTS, deleteProduct);
+	
 }

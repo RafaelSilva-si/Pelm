@@ -1,7 +1,8 @@
 import * as types from './type';
 
 const initialState = {
-    listProd: false
+    listProd: false,
+    select: {}
 };
 
 const productsReducer = (state = initialState, action) => {
@@ -16,6 +17,11 @@ const productsReducer = (state = initialState, action) => {
                 ...state,
                 refresh: action.refresh,
             };
+        case types.SELECT_PRODUCTS:
+            return {
+                ...state,
+                select: action.product
+            }
         default:
             return state;
     }

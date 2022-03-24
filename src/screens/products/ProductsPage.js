@@ -4,13 +4,15 @@ import { connect } from 'react-redux';
 import { LoadingContent, Page } from '../../components/Utils/Page';
 import { productsActions } from '../../store/actions';
 import { navigate } from '../../lib/utils/navigation';
+import ActiveDeleteEdit from '../../components/Utils/TablesRow/ActiveDeleteEdit';
+import { ModalDelete } from '../../components/Utils/Modal';
 
 
 class ProductPage extends React.Component {
 	constructor(props) {
 		super(props);
 
-		const { onActiveDesactiveUser } = this.props;
+		const { onChangeStatus, onSelect } = this.props;
 
 		this.state = {
 			columns: [
@@ -21,20 +23,20 @@ class ProductPage extends React.Component {
 					width: '10%',
 				},
 				{
-					name: 'Nome',
-					selector: 'name',
+					name: 'Descrição',
+					selector: 'descr',
 					sortable: true,
 					width: '25%',
 				},
 				{
 					name: 'Preço',
-					selector: 'price_buy',
+					selector: 'price_sale',
 					sortable: true,
 					width: '25%',
 				},
 				{
-					name: 'Estoque',
-					selector: 'stoq',
+					name: 'Grupo',
+					selector: 'grupo',
 					sortable: true,
 					width: '25%',
 				},
@@ -42,7 +44,14 @@ class ProductPage extends React.Component {
 					name: 'Ações',
 					selector: 'is_active',
 					width: '15%',
-					
+					cell: row => (
+						<ActiveDeleteEdit
+							row={row}
+							route="products"
+							onSelect={brand => onSelect(brand)}
+							changeValue={brand => onChangeStatus(brand)}
+						/>
+					),
 				},
 			],
 		};
@@ -56,10 +65,11 @@ class ProductPage extends React.Component {
 	render() {
 		const {
 			loading,
-			list
+			list,
+			select,
+			onDelete
 		} = this.props;
 
-		console.log(list)
         const { columns } = this.state;
 		return (
 			<Page
@@ -75,6 +85,10 @@ class ProductPage extends React.Component {
 						handleNavigation={page => navigate(page)}
                     />
 				</LoadingContent>
+				<ModalDelete
+					name={select ? select.id : ''}
+					onSubmit={() => onDelete(select.id)}
+				/>
 			</Page>
 		);
 	}
@@ -82,26 +96,15 @@ class ProductPage extends React.Component {
 
 const mapStateToProps = state => ({
 	loading: state.api.loading,
-	list: state.products.listProd
+	list: state.products.listProd,
+	select: state.products.select
 });
 
 const mapDispatchToProps = dispatch => ({
-	onGetListProducts: query => dispatch(productsActions.getProductList(query))
+	onGetListProducts: query => dispatch(productsActions.getProductList(query)),
+	onChangeStatus: query => dispatch(productsActions.onUpdateStatus(query)),
+	onSelect: query => dispatch(productsActions.select(query)),
+	onDelete: query => dispatch(productsActions.onDelete(query))
 });
-/*
-ProductPage.propTypes = {
-	onActiveDesactiveUser: PropTypes.func.isRequired,
-	onClearQuery: PropTypes.func.isRequired,
-	onGetListUsers: PropTypes.func.isRequired,
-	companies: PropTypes.oneOfType([
-		PropTypes.bool,
-		PropTypes.arrayOf(PropTypes.object),
-	]).isRequired,
-	list: PropTypes.oneOfType([
-		PropTypes.bool,
-		PropTypes.arrayOf(PropTypes.object),
-	]).isRequired,
-	loading: PropTypes.bool.isRequired,
-};
-*/
+
 export default connect(mapStateToProps, mapDispatchToProps)(ProductPage);

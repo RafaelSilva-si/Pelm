@@ -28,9 +28,42 @@ export const addProducts = product => {
     };
 };
 
+export const select = product => {
+    return {
+        type: type.SELECT_PRODUCTS,
+        product
+    };
+};
+
+export const onUpdateStatus = product => {
+    return {
+        type: type.UPDATE_STATUS,
+        product
+    };
+};
+
+export const onDelete= product => {
+    return {
+        type: type.DELETE_PRODUCTS,
+        product
+    };
+};
+
+export const onEdit = (product, id) => {
+    return {
+        type: type.EDIT_PRODUCT,
+        product,
+        id
+    }
+}
+
 export default {
     getProductList,
     setProductList,
     setRefresh,
-    addProducts
+    addProducts,
+    select,
+    onUpdateStatus,
+    onDelete,
+    onEdit
 }

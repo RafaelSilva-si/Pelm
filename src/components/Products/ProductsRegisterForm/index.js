@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Button, Row, Col } from 'reactstrap';
-import { Checkbox, InputForm, SelectAsync, SelectInput } from '../../Utils';
+import {  InputForm, SelectAsync, SelectInput, SelectRowLabel } from '../../Utils';
 import { useForm } from 'react-hook-form';
-import PropTypes from '../../../lib/utils/propTypes';
+import { numberToPrice } from '../../../lib/utils/functions';
 import Card from '../../Utils/Card/FormCard';
 
 const FormProduct = ({
     user,
+    forn,
+    brands,
     onSubmit,
     handleNavigation,
     codLabel,
@@ -25,25 +27,69 @@ const FormProduct = ({
     vlrCompraInputProps,
     vlrVendaLabel,
     vlrVendaInputProps,
+    uniInputProps,
     margenLabel,
     margenInputProps,
     btnLabelSubmit,
     btnLabelCancel,
+    prod,
     ...restProps
 }) => {
 
+    console.log(prod)
+    //<Options
+    let fornOptions = {};
+    let brandOptions = {};
+    if (forn) {
+        fornOptions = forn.map(index => ({id:index.id, name: index.forn}))
+    }
+
+    if (brands) {
+        brandOptions = brands.map(index => ({id: index.id, name: index.name}))
+    }
+    //>
+
+    
     const { register, handleSubmit, setValue, } = useForm({
-        defaultValues: false,
+        defaultValues: prod,
     });
 
-    const handleChange = selectedOption => {
-        setValue('group.id', selectedOption.id);
-        setGroupValue({ selectedOption });
+    //< var state
+    
+    const [group, setGroupValue] = useState({ selectedOption: prod? {id: prod.grupo, name: 'Comida pra Dog'} : false });
+    const [forns, setForn] = useState({selectedOption: prod? {id: prod.forn, name: prod.fornname} : false});
+    const [brand, setBrand] = useState({selectedOption: prod? {id: prod.marca, name: prod.marcaname} : false})
+    const [uni, setUni] = useState({selectedOption: prod? prod.unidade_medida === "KG" ? {id: 1, name: prod.unidade_medida} : {id: 2, name: prod.unidade_medida} : false})
+    const [priceBuy, setPriceBuy] = useState(prod? prod.price_buy : 0);
+    const [priceSale, setPriceSale] =  useState(prod? prod.price_sale : 0);
+    const [margem, setMargem] = useState(0);
+
+
+
+    //Functions state var
+    const handleChange = (selectedOption, set, func) => {
+        setValue(set, selectedOption.id);
+        func({ selectedOption });
     };
-    const [group, setGroupValue] = useState({ selectedOption: {} });
+
+    const handleChangeMoney = (value, func, set) => {
+        let vlr = numberToPrice(value.target.value);
+        setValue(set, vlr);
+        func(vlr)
+    }
 
     React.useEffect(() => {
-        register({ name: 'group.id' });
+        let lucro = (parseFloat(priceSale) - parseFloat(priceBuy))
+        setMargem(`${(lucro / parseFloat(priceSale)) * 100}%`);
+    }, [priceSale, priceBuy])
+
+    
+
+    React.useEffect(() => {
+        register({ name: 'grupo' });
+        register({ name: 'forn' });
+        register({ name: 'marca' });
+        register({ name: 'unidade_medida' });
     }, [register]);
 
     return (
@@ -69,10 +115,12 @@ const FormProduct = ({
                 </Col>
                 <Col xl={4} lg={12} md={12}>
                     <Card>
-                        <SelectAsync
+                        <SelectRowLabel
                             placeholder={marcaLabel}
                             {...marcaInputProps}
-                            options={[{ id: 1, name: 'Teste' }]}
+                            options={brandOptions}
+                            value={brand.selectedOption}
+                            onChange={target => handleChange(target, 'marca', setBrand)}
                         />
                     </Card>
                 </Col>
@@ -80,10 +128,12 @@ const FormProduct = ({
             <Row>
                 <Col xl={4} lg={12} md={12}>
                     <Card>
-                        <InputForm
-                            label={fornLabel}
+                        <SelectRowLabel
+                            placeholder={fornLabel}
                             {...fornInputProps}
-                            innerRef={register}
+                            value={forns.selectedOption}
+                            onChange={target => handleChange(target, 'forn', setForn)}
+                            options={fornOptions}
                         />
                     </Card>
                 </Col>
@@ -93,7 +143,7 @@ const FormProduct = ({
                             placeholder={groupLabel}
                             {...groupInputProps}
                             options={[{ id: 1, name: 'Teste' }]}
-                            onChange={handleChange}
+                            onChange={target => handleChange(target, 'grupo', setGroupValue)}
                             value={group.selectedOption}
                         />
                     </Card>
@@ -111,16 +161,10 @@ const FormProduct = ({
             <Row>
                 <Col xl={3} lg={12} md={12}>
                     <Card>
-                        <SelectInput
-                            label="Unidade de medida"
-                            options={[{ id: 1, name: 'KG' }]}
-                        />
-                    </Card>
-                </Col>
-                <Col xl={3} lg={12} md={12}>
-                    <Card>
                         <InputForm
                             label={vlrCompraLabel}
+                            value={priceBuy}
+                            onChange={target => handleChangeMoney(target, setPriceBuy, 'priceBuy')}
                             {...vlrCompraInputProps}
                             innerRef={register}
                         />
@@ -130,16 +174,38 @@ const FormProduct = ({
                     <Card>
                         <InputForm
                             label={vlrVendaLabel}
+                            value={priceSale}
+                            onChange={target => handleChangeMoney(target, setPriceSale, 'priceSale')}
                             {...vlrVendaInputProps}
                             innerRef={register}
                         />
                     </Card>
                 </Col>
-                <Col xl={3} lg={12} md={12}>
+                <Col xl={2} lg={12} md={12}>
                     <Card>
                         <InputForm
                             label={margenLabel}
+                            value={margem}
                             {...margenInputProps}
+                            innerRef={register}
+                        />
+                    </Card>
+                </Col>
+                <Col xl={2} lg={12} md={12}>
+                    <Card>
+                        <SelectAsync
+                            placeholder="Uni"
+                            options={[{ id: 1, name: 'KG' }, {id:2, name: 'UNID'}]}
+                            value={uni.selectedOption}
+                            onChange={target => handleChange(target, 'unidade_medida', setUni)}
+                        />
+                    </Card>
+                </Col>
+                <Col xl={2} lg={12} md={12}>
+                    <Card>
+                        <InputForm
+                            label="Unidade valor"
+                            {...uniInputProps}
                             innerRef={register}
                         />
                     </Card>
@@ -171,8 +237,8 @@ FormProduct.defaultProps = {
     },
     descLabel: 'Descrição',
     descInputProps: {
-        id: 'desc',
-        name: 'desc',
+        id: 'descr',
+        name: 'descr',
     },
     marcaLabel: 'Marca',
     marcaInputProps: {
@@ -181,8 +247,6 @@ FormProduct.defaultProps = {
     },
     fornLabel: 'Fornecedor',
     fornInputProps: {
-        id: 'forn',
-        name: 'forn',
     },
     ncmLabel: 'NCM',
     ncmInputProps: {
@@ -203,6 +267,10 @@ FormProduct.defaultProps = {
     margenInputProps: {
         id: 'margem',
         name: 'margem'
+    },
+    uniInputProps: {
+        id: 'unidade_valor',
+        name: 'unidade_valor',
     },
     btnLabelSubmit: 'Salvar',
     btnLabelCancel: 'Cancelar',

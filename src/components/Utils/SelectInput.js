@@ -8,12 +8,14 @@ import {
 	InputGroupAddon,
 } from 'reactstrap';
 
-export const Select = ({ options, fieldName, fieldValue, ...rest }) => (
+export const Select = ({ options, fieldName, fieldValue,optionSelected,onChangeSelect, valueInput, ...uniInputProps }) => (
 	<div>
 		<InputGroup>
 			<InputGroupAddon>
 				<ReactSelect
 					options={options}
+					value={optionSelected}
+					onChange={onChangeSelect}
 					noOptionsMessage={() => 'Sem opções'}
 					getOptionLabel={option => option[fieldName]}
 					getOptionValue={option => option[fieldValue]}
@@ -31,10 +33,8 @@ export const Select = ({ options, fieldName, fieldValue, ...rest }) => (
 								: 0,
 						}),
 					}}
-					{...rest}
 				/>
 			</InputGroupAddon>
-			<Input />
 
 		</InputGroup>
 
